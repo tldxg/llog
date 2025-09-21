@@ -14,6 +14,7 @@ var summarizeCmd = &cobra.Command{
 	Use:          "summarize",
 	Short:        "Summarize log entries",
 	Long:         `Summarize log entries.`,
+	Args:         cobra.NoArgs,
 	PreRunE:      handler.ValidateOptions(cfg, summarizeOpts),
 	RunE:         handler.Summarize(cfg, db, summarizeOpts),
 	SilenceUsage: true,
@@ -21,5 +22,5 @@ var summarizeCmd = &cobra.Command{
 
 func init() {
 	handler.ApplyFlags(summarizeCmd, summarizeOpts)
-	// rootCmd.AddCommand(summarizeCmd)
+	rootCmd.AddCommand(summarizeCmd)
 }
