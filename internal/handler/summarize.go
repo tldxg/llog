@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
@@ -8,6 +9,8 @@ import (
 	"github.com/ethn1ee/llog/internal/config"
 	_db "github.com/ethn1ee/llog/internal/db"
 	"github.com/ethn1ee/llog/internal/logger"
+	"github.com/ethn1ee/llog/internal/model"
+	"github.com/ethn1ee/llog/internal/view"
 	"github.com/spf13/cobra"
 	"google.golang.org/genai"
 )
@@ -22,48 +25,90 @@ func Summarize(cfg *config.Config, db *_db.DB, opts *SummarizeOpts) HandlerFunc 
 		entries, err := getWithOpts(cfg, db, cmd, &GetOpts{
 			Time:  opts.Time,
 			Limit: opts.Limit,
-			All:   false,
+			All:   opts.All,
 		})
 		if err != nil {
 			return err
 		}
 
-		client, err := genai.NewClient(ctx, nil)
+		spinner := view.StartSpinner(fmt.Sprintf("summarizing %d entries...", len(entries)))
+		summaries, err := summarizeEntries(cfg, ctx, entries)
 		if err != nil {
-			return fmt.Errorf("failed to initialize Gemini client: %w", err)
+			return fmt.Errorf("failed to summarize entries: %w", err)
 		}
+		view.StopSpinner(spinner)
 
-		thinkingBudget := int32(0)
-		prompt := fmt.Sprintf("You are a summarizer who concisely summarizes a list of timestamped activities that the user provides. You should make any other output except the summary itself, and address in first-person in the summary. Summarize the entries provided: %+v", entries)
-
-		res, err := client.Models.GenerateContent(
-			ctx,
-			"gemini-2.5-flash",
-			genai.Text(prompt),
-			&genai.GenerateContentConfig{
-				ThinkingConfig: &genai.ThinkingConfig{
-					ThinkingBudget: &thinkingBudget,
-				},
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("failed to generate content: %w", err)
-		}
-
-		fmt.Println(res.Text())
+		view.PrintSummaries(cfg, summaries)
+		view.PrintSummarize(len(entries))
 
 		return nil
 	}
 }
 
+func summarizeEntries(cfg *config.Config, ctx context.Context, entries []model.Entry) (string, error) {
+	client, err := genai.NewClient(ctx, nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to initialize Gemini client: %w", err)
+	}
+
+	thinkingBudget := int32(0)
+	prompt := fmt.Sprintf(`
+			<prompt>
+			You are a summarizer who concisely summarizes a list of timestamped activities that the user provides.
+			Each entry contains the ID, timestamp, and body.
+			You should summarize each day, and return as an array of day summaries containing the date and summary.
+			The format of the date must be %s.
+			The summary for each day must be one sentence.
+			The sentences must be impersonal and agentless, meaning that it should start with a verb in past tense, not a pronoun or agent of the action (e.g. "went shopping").
+			You may omit some minor details in summary in order to fit into one sentence concisely.
+			</prompt>
+
+			<entries>
+			%+v
+			</entries>`,
+		cfg.DateLayout, entries,
+	)
+
+	config := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+		ResponseSchema: &genai.Schema{
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"date":    {Type: genai.TypeString},
+					"summary": {Type: genai.TypeString},
+				},
+				PropertyOrdering: []string{"date", "summary"},
+			},
+		},
+		ThinkingConfig: &genai.ThinkingConfig{
+			ThinkingBudget: &thinkingBudget,
+		},
+	}
+	res, err := client.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		genai.Text(prompt),
+		config,
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate content: %w", err)
+	}
+
+	return res.Text(), nil
+}
+
 type SummarizeOpts struct {
 	Time  timeOpts
 	Limit int
+	All   bool
 }
 
 func (o *SummarizeOpts) applyFlags(cmd *cobra.Command) {
 	o.Time.applyFlags(cmd)
 	cmd.Flags().IntVarP(&(o.Limit), "limit", "n", 10, "number of entries to summarize")
+	cmd.Flags().BoolVarP(&(o.All), "all", "a", false, "summarize all entries")
 }
 
 func (o *SummarizeOpts) validate(cfg *config.Config, args []string, flags []string) error {
@@ -79,12 +124,25 @@ func (o *SummarizeOpts) validate(cfg *config.Config, args []string, flags []stri
 		if slices.Contains(flags, "limit") {
 			return fmt.Errorf(flagMutexError, "from", "limit")
 		}
+		if slices.Contains(flags, "all") {
+			return fmt.Errorf(flagMutexError, "from", "all")
+		}
 		o.Limit = -1
 	}
 
 	if !o.Time.toTime.IsZero() {
 		if slices.Contains(flags, "limit") {
 			return fmt.Errorf(flagMutexError, "to", "limit")
+		}
+		if slices.Contains(flags, "all") {
+			return fmt.Errorf(flagMutexError, "to", "all")
+		}
+		o.Limit = -1
+	}
+
+	if o.All {
+		if slices.Contains(flags, "limit") {
+			return fmt.Errorf(flagMutexError, "all", "limit")
 		}
 		o.Limit = -1
 	}

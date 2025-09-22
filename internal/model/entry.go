@@ -9,3 +9,8 @@ type Entry struct {
 	ID   uint64 `gorm:"primaryKey;autoIncrement"`
 	Body string
 }
+
+type Summary struct {
+	Date    string `json:"date"`
+	Summary string `json:"summary"`
+}

@@ -3,45 +3,30 @@ package view
 import "fmt"
 
 func PrintGet(count int) {
-	var msg string
-	switch count {
-	case 0:
-		msg = "no entry retrieved"
-	case 1:
-		msg = "1 entry retrieved"
-	default:
-		msg = fmt.Sprintf("%d entries retrieved", count)
-	}
-
-	fmt.Println(msg)
+	fmt.Println(entryAction(count, "retrieved"))
 }
 
 func PrintAdd(count int) {
-	var msg string
-	switch count {
-	case 0:
-		msg = "no entry created"
-	case 1:
-		msg = "1 entry created"
-	default:
-		msg = fmt.Sprintf("%d entries created", count)
-	}
-
-	fmt.Println(msg)
+	fmt.Println(entryAction(count, "created"))
 }
 
 func PrintDelete(count int) {
-	var msg string
+	fmt.Println(entryAction(count, "deleted"))
+}
+
+func PrintSummarize(count int) {
+	fmt.Println(entryAction(count, "summarized"))
+}
+
+func entryAction(count int, action string) string {
 	switch count {
 	case 0:
-		msg = "no entry deleted"
+		return fmt.Sprintf("no entry %s", action)
 	case 1:
-		msg = "1 entry deleted"
+		return fmt.Sprintf("1 entry %s", action)
 	default:
-		msg = fmt.Sprintf("%d entries deleted", count)
+		return fmt.Sprintf("%d entries %s", count, action)
 	}
-
-	fmt.Println(msg)
 }
 
 func PrintNuke() {
