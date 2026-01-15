@@ -4,7 +4,7 @@ Copyright © 2025 Ethan Lee <ethantlee21@gmail.com>
 package cmd
 
 import (
-	"github.com/ethn1ee/llog/internal/handler"
+	"github.com/thdxg/llog/internal/handler"
 	"github.com/spf13/cobra"
 )
 

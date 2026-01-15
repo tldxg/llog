@@ -10,7 +10,7 @@ Use it as your dev log for standups, as a timestamped journal, or even as an ins
 
 ### From Releases
 
-You can download the latest pre-compiled binary for your operating system from the [GitHub Releases](https://github.com/ethn1ee/llog/releases) page.
+You can download the latest pre-compiled binary for your operating system from the [GitHub Releases](https://github.com/thdxg/llog/releases) page.
 
 1.  Download the archive for your OS and architecture.
 2.  Extract the `llog` binary.
@@ -21,7 +21,7 @@ You can download the latest pre-compiled binary for your operating system from t
 If you have the Go toolchain installed, you can install `llog` with a single command.
 
 ```bash
-go install github.com/ethn1ee/llog@latest
+go install github.com/thdxg/llog@latest
 ```
 
 _(Ensure `$HOME/go/bin` is in your `PATH`)_
@@ -32,7 +32,7 @@ You can also build `llog` from source if you have Go installed.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/ethn1ee/llog.git
+git clone https://github.com/thdxg/llog.git
 cd llog
 
 # 2. Build the binary

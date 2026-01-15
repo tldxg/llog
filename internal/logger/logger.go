@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/ethn1ee/llog/internal/config"
+	"github.com/thdxg/llog/internal/config"
 	"github.com/spf13/cobra"
 )
 

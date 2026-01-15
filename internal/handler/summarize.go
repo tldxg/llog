@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/ethn1ee/llog/internal/config"
-	_db "github.com/ethn1ee/llog/internal/db"
-	"github.com/ethn1ee/llog/internal/logger"
-	"github.com/ethn1ee/llog/internal/model"
-	"github.com/ethn1ee/llog/internal/view"
+	"github.com/thdxg/llog/internal/config"
+	_db "github.com/thdxg/llog/internal/db"
+	"github.com/thdxg/llog/internal/logger"
+	"github.com/thdxg/llog/internal/model"
+	"github.com/thdxg/llog/internal/view"
 	"github.com/spf13/cobra"
 	"google.golang.org/genai"
 )

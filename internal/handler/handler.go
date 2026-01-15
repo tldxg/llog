@@ -3,9 +3,9 @@ package handler
 import (
 	"fmt"
 
-	"github.com/ethn1ee/llog/internal/config"
-	_db "github.com/ethn1ee/llog/internal/db"
-	"github.com/ethn1ee/llog/internal/logger"
+	"github.com/thdxg/llog/internal/config"
+	_db "github.com/thdxg/llog/internal/db"
+	"github.com/thdxg/llog/internal/logger"
 	"github.com/spf13/cobra"
 )
 

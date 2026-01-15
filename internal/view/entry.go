@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"github.com/ethn1ee/llog/internal/config"
-	"github.com/ethn1ee/llog/internal/model"
+	"github.com/thdxg/llog/internal/config"
+	"github.com/thdxg/llog/internal/model"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/renderer"

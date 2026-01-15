@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/ethn1ee/llog/internal/model"
+	"github.com/thdxg/llog/internal/model"
 	"gorm.io/gorm"
 )
 
@@ -38,6 +38,8 @@ func (db *entryDB) GetLast(ctx context.Context) (model.Entry, error) {
 	return db.i.Order("created_at desc").Last(ctx)
 }
 
+// to not apply any filter, subquery = nil
+// to fetch all entries, n = -1
 func (db *entryDB) Get(ctx context.Context, subquery gorm.ChainInterface[model.Entry], n int) ([]model.Entry, error) {
 	var limited gorm.ChainInterface[model.Entry]
 	if subquery == nil {
